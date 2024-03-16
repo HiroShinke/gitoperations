@@ -26,9 +26,6 @@ class GitTest(unittest.TestCase):
 
     def test_cherrypick1(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
@@ -97,9 +94,6 @@ goodby europe
 
     def test_cherrypick2(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
@@ -193,9 +187,6 @@ goodby europe
 
     def test_cherrypick3(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 xxx        

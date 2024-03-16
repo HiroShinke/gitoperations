@@ -98,9 +98,6 @@ hello2.txt
 
     def test_rebase1(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
