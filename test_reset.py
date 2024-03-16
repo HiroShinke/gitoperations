@@ -27,9 +27,6 @@ class GitTest(unittest.TestCase):
 
     def test_reset1(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
@@ -79,9 +76,6 @@ goodby japan
 
     def test_reset2(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
@@ -130,9 +124,6 @@ index 47ca7f2..d3bbad9 100644
 
     def test_reset3(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
@@ -177,9 +168,6 @@ goodby japan
 
     def test_reset4(self):
 
-        os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
-        
         make_file("hello.txt","""\
 hello, world
 """
