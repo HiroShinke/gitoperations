@@ -4,6 +4,7 @@
 import subprocess
 import os
 import shutil
+import hashlib
 import sys
 import io
 
