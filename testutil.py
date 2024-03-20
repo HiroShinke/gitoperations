@@ -46,6 +46,12 @@ def hexdigest(path,type=None):
         m.update(contents)
     return m.hexdigest()
 
+def commit_file(name):
+    make_file(f"{name}.txt",f"{name}\n") 
+    cmd_stdout(f"git add {name}.txt")
+    cmd_stdout(f"git commit -m {name}")
+
+
 os.environ["GIT_AUTHOR_DATE"] = "Fri May 5 20:30:55 2023 +0900"
 os.environ["GIT_COMMITTER_DATE"] = "Fri May 5 20:30:55 2023 +0900"
 DIR_ORG = os.path.abspath(".")
