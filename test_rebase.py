@@ -23,8 +23,6 @@ class GitTest(unittest.TestCase):
         cmd_stdout("git config user.name HirofumiShinke")
         cmd_stdout("git config user.email hiro.shinke@gmail.com")
 
-
-
     def test_rebase1(self):
 
         commit_file("A")
