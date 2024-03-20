@@ -419,11 +419,6 @@ goodby china
         
     def test_rebase3(self):
 
-        def commit_file(name):
-            make_file(f"{name}.txt",f"{name}\n") 
-            cmd_stdout(f"git add {name}.txt")
-            cmd_stdout(f"git commit -m {name}")
-
         commit_file("E")
         commit_file("F")
         commit_file("G")
