@@ -27,6 +27,254 @@ class GitTest(unittest.TestCase):
 
     def test_rebase1(self):
 
+        commit_file("A")
+        commit_file("B")        
+        commit_file("C")
+        
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout -b new-topic")
+
+        commit_file("D")
+        commit_file("E")        
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+        
+        cmd_stdout("git checkout master")
+
+        commit_file("F")
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 8f4e340 F
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git rebase new-topic")
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 8b27ada F
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        ret = cmd_stdout("git show-branch --more=5")
+        self.assertEqual("""\
+* [master] F
+ ! [new-topic] E
+--
+*  [master] F
+*+ [new-topic] E
+*+ [new-topic^] D
+*+ [new-topic~2] C
+*+ [new-topic~3] B
+*+ [new-topic~4] A
+"""
+                         ,ret)
+
+
+    def test_rebase2(self):
+
+        commit_file("A")
+        commit_file("B")        
+        commit_file("C")
+        
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout -b new-topic")
+
+        commit_file("D")
+        commit_file("E")        
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+        
+        cmd_stdout("git checkout master")
+
+        commit_file("F")
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 8f4e340 F
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git rebase --onto new-topic master~ master")
+        
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 8b27ada F
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        ret = cmd_stdout("git show-branch --more=5")
+        self.assertEqual("""\
+* [master] F
+ ! [new-topic] E
+--
+*  [master] F
+*+ [new-topic] E
+*+ [new-topic^] D
+*+ [new-topic~2] C
+*+ [new-topic~3] B
+*+ [new-topic~4] A
+"""
+                         ,ret)
+
+
+
+
+    def test_rebase3(self):
+
+        commit_file("A")
+        commit_file("B")
+        commit_file("C")
+        commit_file("D")
+        commit_file("E")
+
+        
+        self.assertEqual("""\
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        cmd_stdout("git branch maint 0441581")
+        cmd_stdout("git checkout maint")
+
+        commit_file("W")
+        commit_file("X")
+        commit_file("Y")
+        commit_file("Z")
+
+        self.assertEqual("""\
+* 46f4fb0 Z
+* c88d99e Y
+* d1bb43e X
+* 8467c6b W
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        cmd_stdout("git branch feature c88d99e")
+        cmd_stdout("git checkout feature")
+
+        commit_file("P")
+        commit_file("Q")
+
+        self.assertEqual("""\
+* 763c98d Q
+* 7850129 P
+* c88d99e Y
+* d1bb43e X
+* 8467c6b W
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+
+        cmd_stdout("git rebase --onto master maint~ feature")
+        
+        self.assertEqual("""\
+* d994301 Q
+* 6ce9ab1 P
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+
+        
+        self.assertEqual("""\
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+        
+        
+    def test_rebase4(self):
+
+        commit_file("E")
+        commit_file("F")
+        commit_file("G")
+        commit_file("H")
+        commit_file("I")
+        commit_file("J")        
+
+        self.assertEqual("""\
+* 39f824d J
+* 15755eb I
+* ca7cd2f H
+* 98b455d G
+* 57eb397 F
+* ae463d8 E
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+        
+        cmd_stdout('git rebase --onto master~5 master~3 master')
+
+
+        self.assertEqual("""\
+* 65e2642 J
+* 351ed9c I
+* 3552661 H
+* ae463d8 E
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        
+    def test_rebase_txt1(self):
+
         make_file("hello.txt","""\
 hello, world
 """
@@ -194,7 +442,7 @@ goodby world
                          ,ret)
 
 
-    def test_rebase1_1(self):
+    def test_rebase_txt1_1(self):
 
         """ use ptyexec for continue """
         
@@ -287,7 +535,7 @@ goodby europe
                          ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
 
 
-    def test_rebase2(self):
+    def test_rebase_txt2(self):
 
         make_file("hello.txt","""\
 hello, world
@@ -417,35 +665,6 @@ goodby china
                          ,cmd_stdout("git show-branch"))
 
         
-    def test_rebase3(self):
-
-        commit_file("E")
-        commit_file("F")
-        commit_file("G")
-        commit_file("H")
-        commit_file("I")
-        commit_file("J")        
-
-        self.assertEqual("""\
-* 39f824d J
-* 15755eb I
-* ca7cd2f H
-* 98b455d G
-* 57eb397 F
-* ae463d8 E
-"""
-                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
-        
-        cmd_stdout('git rebase --onto master~5 master~3 master')
-
-
-        self.assertEqual("""\
-* 65e2642 J
-* 351ed9c I
-* 3552661 H
-* ae463d8 E
-"""
-                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
 
         
 if __name__ == "__main__":
