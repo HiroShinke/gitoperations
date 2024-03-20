@@ -166,8 +166,85 @@ class GitTest(unittest.TestCase):
 
 
 
-
     def test_rebase3(self):
+
+        commit_file("A")
+        commit_file("B")        
+        commit_file("C")
+        
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout -b new-topic")
+
+        commit_file("D")
+        commit_file("E")        
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 4f26866 E
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+        
+        cmd_stdout("git checkout master")
+
+        commit_file("F")
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 8f4e340 F
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,ret)
+
+        cmd_stdout("git rebase --onto master new-topic")
+        
+        ret = cmd_stdout("git show-branch --more=5")
+        self.assertEqual("""\
+* [master] F
+ ! [new-topic] E
+--
+ + [new-topic] E
+ + [new-topic^] D
+*  [master] F
+*+ [new-topic~2] C
+*+ [new-topic~3] B
+*+ [new-topic~4] A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout master")
+        cmd_stdout("git merge new-topic")
+
+        ret = cmd_stdout("git show-branch --more=5")
+        self.assertEqual("""\
+* [master] Merge branch 'new-topic'
+ ! [new-topic] E
+--
+-  [master] Merge branch 'new-topic'
+*+ [new-topic] E
+*+ [new-topic^] D
+*  [master^] F
+*+ [master~2] C
+*+ [master~3] B
+*+ [master~4] A
+"""
+                         ,ret)
+
+
+
+    def test_rebase4(self):
 
         commit_file("A")
         commit_file("B")
