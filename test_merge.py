@@ -266,6 +266,101 @@ r"""*   6b8756b F'
 """
                          ,ret)
 
+    def test_merge3(self):
+
+        """ First track merge """
+
+        make_file("hello.txt","""\
+hello, world
+"""
+                  )
+        cmd_stdout("git add hello.txt")
+        cmd_stdout('git commit -m A')
+
+        make_file("hello.txt","""\
+hello, world
+goodby japan
+"""
+                  )
+        cmd_stdout("git add hello.txt")
+        cmd_stdout('git commit -m B')
+
+        make_file("hello.txt","""\
+hello, world
+goodby japan
+goodby america
+"""
+                  )
+        cmd_stdout("git add hello.txt")
+        cmd_stdout('git commit -m C')
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 40c9072 C
+* b3db10b B
+* 70809e4 A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout -b new-topic")
+
+        make_file("hello.txt","""\
+hello, world
+goodby japan
+goodby euroep
+goodby america
+"""
+                  )
+        cmd_stdout("git add hello.txt")
+        cmd_stdout('git commit -m D')
+
+        make_file("hello.txt","""\
+hello, world
+goodby japan
+goodby europe
+goodby america
+goodby africa
+"""
+                  )
+        cmd_stdout("git add hello.txt")
+        cmd_stdout('git commit -m E')
+
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 0b93403 E
+* 25de5b8 D
+* 40c9072 C
+* b3db10b B
+* 70809e4 A
+"""
+                         ,ret)
+
+        cmd_stdout("git checkout master")
+        cmd_stdout("git merge new-topic")
+
+        ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
+        self.assertEqual("""\
+* 0b93403 E
+* 25de5b8 D
+* 40c9072 C
+* b3db10b B
+* 70809e4 A
+"""
+                         ,ret)
+
+        ret = cmd_stdout("git show-branch --more=5")
+        self.assertEqual("""\
+* [master] E
+ ! [new-topic] E
+--
+*+ [master] E
+*+ [master^] D
+*+ [master~2] C
+*+ [master~3] B
+*+ [master~4] A
+"""
+                         ,ret)
 
 
 if __name__ == "__main__":
