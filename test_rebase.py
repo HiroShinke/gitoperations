@@ -237,6 +237,21 @@ class GitTest(unittest.TestCase):
 
         
         self.assertEqual("""\
+* [feature] Q
+ ! [maint] Z
+  ! [master] E
+---
+ +  [maint] Z
+ +  [maint^] Y
+ +  [maint~2] X
+ +  [maint~3] W
+*   [feature] Q
+*   [feature^] P
+* + [master] E
+* + [master^] D
+* + [master~2] C
+*++ [maint~4] B
+*++ [maint~5] A
 """
                          ,cmd_stdout("git show-branch --more=5"))
 
