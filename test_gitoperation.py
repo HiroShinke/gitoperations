@@ -24,37 +24,37 @@ class GitTest(unittest.TestCase):
         cmd_stdout("git config user.name HirofumiShinke")
         cmd_stdout("git config user.email hiro.shinke@gmail.com")
 
-    def test_basec1(self):
+    def test_basic1(self):
         make_file("hello.txt","hello world")
         cmd_stdout("git add hello.txt")
         ret = cmd_stdout("git status")
         self.assertTrue(re.search("No commits yet",ret))
 
-    def test_basec2(self):
+    def test_basic2(self):
         make_file("hello.txt","hello world")
         cmd_stdout("git add hello.txt")
         cmd_stdout('git commit -m "add hello.txt" hello.txt')
         ret = cmd_stdout("git status")
         self.assertTrue( re.search("nothing to commit, working tree clean",ret) )
 
-    def test_basec3(self):
+    def test_basic3(self):
         make_file("hello.txt","hello world\n")
         cmd_stdout("git add hello.txt")
         ret = cmd_stdout("git ls-files -s")
         self.assertEqual('100644 3b18e512dba79e4c8300dd08aeb37f8e728b8dad 0\thello.txt\n',ret)
 
-    def test_basec4(self):
+    def test_basic4(self):
         make_file("hello.txt","hello world\n")
         cmd_stdout("git add hello.txt")
         ret = cmd_stdout("git write-tree")
         self.assertEqual('68aba62e560c0ebc3396e8ae9335232cd93a3f60\n',ret)
 
-    def test_basec5(self):
+    def test_basic5(self):
         make_file("hello.txt","hello world\n")
         ret = hexdigest("hello.txt","blob")
         self.assertEqual('3b18e512dba79e4c8300dd08aeb37f8e728b8dad',ret)
 
-    def test_basec6(self):
+    def test_basic6(self):
         make_file("hello.txt","hello world\n")
         cmd_stdout("git add hello.txt")
         cmd_stdout("git write-tree")
