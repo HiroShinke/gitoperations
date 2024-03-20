@@ -28,7 +28,7 @@ def handler(signal,frame):
     # print("Sub Porcess exit",file=sys.stderr)
     raise InterruptedError()
 
-def pty_exec(cmd,keyseq=None,stdout=None):
+def pty_exec(cmd,keyseq=None,stdout=None,debug=False):
 
     args = re.split(r"\s+",cmd)
     
@@ -63,7 +63,8 @@ def pty_exec(cmd,keyseq=None,stdout=None):
     
     try:
         if keyseq:
-            print(f"keyseq = {keyseq}",file=sys.stderr)
+            if debug:
+                print(f"keyseq = {keyseq}",file=sys.stderr)
             os.write(master,keyseq)
     
         while ret := os.read(sys.stdin.fileno(),1024):

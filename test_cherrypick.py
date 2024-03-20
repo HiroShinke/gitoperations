@@ -92,6 +92,21 @@ goodby europe
                          ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
 
 
+        self.assertEqual("""\
+! [master] D
+ * [new-topic] D
+--
+ * [new-topic] D
+ * [new-topic^] xxx C
++  [master] D
++  [master^] C
++  [master~2] B
++* [new-topic~2] A
+"""
+                         ,cmd_stdout('git show-branch'))
+        
+
+
     def test_cherrypick2(self):
 
         make_file("hello.txt","""\
