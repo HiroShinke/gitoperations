@@ -71,8 +71,11 @@ goodby america
                          ,ret)
         
         ptyexec.pty_exec('git rebase -i master~3',
-                         keyseq=b"/pick\rncwsquash\x1b:wq\r:wq\r",
-                         delay=0.2)
+                         commandseq= [ { "keys"  : b"/pick\rncwsquash\x1b:wq\r" },
+                                       { "delay" : 0.2 },
+                                       { "keys"  : b":wq\r"}
+                                       ]
+                         )
 
         ret = cmd_stdout("git log --graph --abbrev-commit --oneline")
         self.assertEqual("""\
