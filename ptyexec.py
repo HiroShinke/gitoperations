@@ -10,6 +10,7 @@ import fcntl
 import array
 import argparse
 import re
+import time
 import signal
 
 
@@ -28,7 +29,7 @@ def handler(signal,frame):
     # print("Sub Porcess exit",file=sys.stderr)
     raise InterruptedError()
 
-def pty_exec(cmd,keyseq=None,stdout=None,debug=False):
+def pty_exec(cmd,keyseq=None,stdout=None,debug=False,delay=None):
 
     args = re.split(r"\s+",cmd)
     
@@ -65,13 +66,20 @@ def pty_exec(cmd,keyseq=None,stdout=None,debug=False):
         if keyseq:
             if debug:
                 print(f"keyseq = {keyseq}",file=sys.stderr)
-            os.write(master,keyseq)
-    
+            if delay:
+                for c in keyseq:
+                    os.write(master,bytes([c]))
+                    time.sleep(delay)
+                    tty.setraw(sys.stdin.fileno())
+            else:
+                os.write(master,keyseq)
+
         while ret := os.read(sys.stdin.fileno(),1024):
             os.write(master,ret)
 
     except InterruptedError:
-        pass
+        if debug:
+            print(f"interupted!!",file=sys.stderr)
     
     os.close(master)
     ret = p.wait()
