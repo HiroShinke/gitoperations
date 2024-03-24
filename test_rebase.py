@@ -362,6 +362,311 @@ class GitTest(unittest.TestCase):
 """
                          ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
 
+
+    def helper_rebase5(self):
+
+        commit_file("A")
+        commit_file("B")
+        commit_file("C")
+        commit_file("D")
+
+        self.assertEqual("""\
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+        
+        cmd_stdout("git branch dev master~3")
+        cmd_stdout("git checkout dev")
+
+        commit_file("X")
+        commit_file("Y")
+        commit_file("Z")
+        
+        self.assertEqual("""\
+* f7491ed Z
+* 174d94d Y
+* 7e3b2a3 X
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        cmd_stdout("git branch dev2 dev~")
+        cmd_stdout("git checkout dev2")
+        
+        commit_file("P")
+        commit_file("Q")
+
+        self.assertEqual("""\
+* aa352cf Q
+* 283ec77 P
+* 174d94d Y
+* 7e3b2a3 X
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        cmd_stdout("git rebase master dev")
+
+        self.assertEqual("""\
+* da1e91a Z
+* ccdbf92 Y
+* c682392 X
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        
+        self.assertEqual("""\
+* [dev] Z
+ ! [dev2] Q
+  ! [master] D
+---
+ +  [dev2] Q
+ +  [dev2^] P
+ +  [dev2~2] Y
+ +  [dev2~3] X
+*   [dev] Z
+*   [dev^] Y
+*   [dev~2] X
+* + [master] D
+* + [master^] C
+* + [master~2] B
+*++ [dev2~4] A
+"""
+                         ,cmd_stdout("git show-branch"))
+
+
+    def test_rebase5_1(self):
+
+        self.helper_rebase5()
+        
+        cmd_stdout("git rebase dev~ dev2")        
+        
+        self.assertEqual("""\
+! [dev] Z
+ * [dev2] Q
+  ! [master] D
+---
+ *  [dev2] Q
+ *  [dev2^] P
++   [dev] Z
++*  [dev2~2] Y
++*  [dev2~3] X
++*+ [master] D
++*+ [master^] C
++*+ [master~2] B
++*+ [master~3] A
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+
+    def test_rebase5_2(self):
+
+        self.helper_rebase5()
+        
+        cmd_stdout("git rebase --onto dev~ dev2~3 dev2")        
+        
+        self.assertEqual("""\
+! [dev] Z
+ * [dev2] Q
+  ! [master] D
+---
+ *  [dev2] Q
+ *  [dev2^] P
++   [dev] Z
++*  [dev2~2] Y
++*  [dev2~3] X
++*+ [master] D
++*+ [master^] C
++*+ [master~2] B
++*+ [master~3] A
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+
+    def helper_rebase6(self):
+
+        commit_file("A")
+        commit_file("B")
+        commit_file("C")
+        commit_file("D")
+
+        self.assertEqual("""\
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+                         ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+        
+        cmd_stdout("git branch dev master~2")
+        cmd_stdout("git checkout dev")
+
+        commit_file("X")
+        commit_file("Y")
+        commit_file("Z")
+
+        self.assertEqual("""\
+* [dev] Z
+ ! [master] D
+--
+ + [master] D
+ + [master^] C
+*  [dev] Z
+*  [dev^] Y
+*  [dev~2] X
+*+ [master~2] B
+*+ [master~3] A
+"""
+                     ,cmd_stdout("git show-branch --more=5"))
+
+
+        
+        cmd_stdout("git branch dev2 dev~1")
+        cmd_stdout("git checkout dev2")
+
+        commit_file("P")
+
+        self.assertEqual("""\
+* a1dca86 P
+* 3de9d62 Y
+* 4405c30 X
+* 0441581 B
+* 2dd0306 A
+"""
+        ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        cmd_stdout("git checkout dev")
+        cmd_stdout("git merge dev2")
+
+        commit_file("N")
+
+        self.assertEqual("""\
+* [dev] N
+ ! [dev2] P
+  ! [master] D
+---
+  + [master] D
+  + [master^] C
+*   [dev] N
+*+  [dev2] P
+*   [dev~2] Z
+*+  [dev~3] Y
+*+  [dev~4] X
+*++ [master~2] B
+*++ [master~3] A
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+        self.assertEqual(
+r"""* 07d853e N
+*   eb7aeba Merge branch 'dev2' into dev
+|\  
+| * a1dca86 P
+* | 1ee5867 Z
+|/  
+* 3de9d62 Y
+* 4405c30 X
+* 0441581 B
+* 2dd0306 A
+"""
+        ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+
+    def test_rebase6_1(self):
+
+        self.helper_rebase6()
+
+        cmd_stdout("git rebase master dev")
+
+        
+        self.assertEqual("""\
+* [dev] N
+ ! [dev2] P
+  ! [master] D
+---
+ +  [dev2] P
+ +  [dev2^] Y
+ +  [dev2~2] X
+*   [dev] N
+*   [dev^] P
+*   [dev~2] Z
+*   [dev~3] Y
+*   [dev~4] X
+* + [master] D
+* + [master^] C
+*++ [dev2~3] B
+*++ [dev2~4] A
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+        self.assertEqual("""\
+* 43439fb N
+* e331821 P
+* da1e91a Z
+* ccdbf92 Y
+* c682392 X
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+        ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+        
+
+
+    def test_rebase6_2(self):
+
+        self.helper_rebase6()
+
+        cmd_stdout("git checkout dev")
+#       ptyexec.pty_exec("git rebase --rebase-merges master -i",
+#                        keyseq=b":wq\r")
+        cmd_stdout("git rebase --rebase-merges master")
+        
+        self.assertEqual("""\
+* [dev] N
+ ! [dev2] P
+  ! [master] D
+---
+ +  [dev2] P
+ +  [dev2^] Y
+ +  [dev2~2] X
+*   [dev] N
+*   [dev^^2] P
+*   [dev~2] Z
+*   [dev~3] Y
+*   [dev~4] X
+* + [master] D
+* + [master^] C
+*++ [dev2~3] B
+*++ [dev2~4] A
+"""
+                         ,cmd_stdout("git show-branch --more=5"))
+
+        self.assertEqual(
+r"""* b6f4097 N
+*   7a72e89 Merge branch 'dev2' into dev
+|\  
+| * cfbab7c P
+* | da1e91a Z
+|/  
+* ccdbf92 Y
+* c682392 X
+* 3af0be2 D
+* b8324b8 C
+* 0441581 B
+* 2dd0306 A
+"""
+        ,cmd_stdout("git log --graph --abbrev-commit --oneline"))
+
+        
         
     def test_rebase_txt1(self):
 
